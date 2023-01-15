@@ -12,24 +12,25 @@ package comp2112_project3_modified;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.HashMap;
 
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
+import java.util.Queue;
+import java.util.Stack;
 
 public class Graph {
     private int[][] adjacencyMatrix;
     public HashTable ht = new HashTable(100);
-    private List<List<Integer>> allPaths = new ArrayList<List<Integer>>(); //To store all valid paths
+ 
 
-    // This method reads the graph data from a file and populates the adjacency matrix
+    
     public void readGraphFromFile(String fileName) {
-        try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
+        try (BufferedReader breader = new BufferedReader(new FileReader(fileName))) {
             String line;
             int numVertices = 0;
-            while ((line = br.readLine()) != null) {
+            while ((line = breader.readLine()) != null) {
                 String[] tokens = line.split(" ");
                 if (ht.search(tokens[0]) == -1) {
                     ht.add(tokens[0]);
@@ -41,14 +42,14 @@ public class Graph {
                 }
             }
             adjacencyMatrix = new int[numVertices][numVertices];
-            br.close();
+            breader.close();
 
             BufferedReader reader = new BufferedReader(new FileReader(fileName));
             while ((line = reader.readLine()) != null) {
-                String[] tokens = line.split(" ");
-                int i = ht.search(tokens[0]);
-                int j = ht.search(tokens[1]);
-                int weight = Integer.parseInt(tokens[2]);
+                String[] parts = line.split(" ");
+                int i = ht.search(parts[0]);
+                int j = ht.search(parts[1]);
+                int weight = Integer.parseInt(parts[2]);
                 adjacencyMatrix[i][j] = weight;
                 adjacencyMatrix[j][i] = weight;
             }
@@ -58,30 +59,30 @@ public class Graph {
         }
     }
 
-    // This method checks if a path exists between two vertices in the graph
+    
     public boolean isThereAPath(String name1, String name2) {
-        int vertex1 = ht.search(name1);
-        int vertex2 = ht.search(name2);
+        int v1 = ht.search(name1);
+        int v2 = ht.search(name2);
 
-        if (vertex1 == -1 || vertex2 == -1) {
-            System.out.println("One or both of the specified vertices do not exist in the graph.");
+        if (v1 == -1 || v2 == -1) {
+            System.out.println("Failed");
             return false;
         }
 
         boolean[] visited = new boolean[adjacencyMatrix.length];
-        return depthFirstSearch(vertex1, vertex2, visited);
+        return depthFirstSearch(v1, v2, visited);
     }
 
-    // This is a helper method that performs a depth-first search on the graph
-    private boolean depthFirstSearch(int currentVertex, int targetVertex, boolean[] visited) {
+    
+    private boolean depthFirstSearch(int currentVertex, int endVertex, boolean[] visited) {
         visited[currentVertex] = true;
         for (int i = 0; i < adjacencyMatrix.length; i++) {
             if (adjacencyMatrix[currentVertex][i] > 0) {
-                if (i == targetVertex) {
+                if (i == endVertex) {
                     return true;
                 }
                 if (!visited[i]) {
-                    if (depthFirstSearch(i, targetVertex, visited)) {
+                    if (depthFirstSearch(i, endVertex, visited)) {
                         return true;
                     }
                 }
@@ -89,43 +90,174 @@ public class Graph {
         }
     return false;
 }
-       public int ShortestPathLengthFromTo(String name1, String name2) {
+       
+  public void BFSfromTo(String name1, String name2) {
     int start = ht.search(name1);
     int end = ht.search(name2);
+
+    if (start == -1 || end == -1) {
+        System.out.println("Failed.");
+        return;
+    }
+
+    boolean[] visited = new boolean[adjacencyMatrix.length];
+    Queue<Integer> queue = new LinkedList<>();
+    queue.add(start);
+    visited[start] = true;
+    while (!queue.isEmpty()) {
+        int current = queue.poll();
+        System.out.print(ht.getValue(current) + " ");
+        if (current == end) {
+            System.out.println("There is a Path  from " + name1 + " to " + name2);
+            return;
+        }
+        for (int i = 0; i < adjacencyMatrix.length; i++) {
+            if (adjacencyMatrix[current][i] > 0 && !visited[i]) {
+                queue.add(i);
+                visited[i] = true;
+            }
+        }
+    }
+    System.out.println("There is no path  from " + name1 + " to " + name2);
+}
+ //Check this code
+  public void DFSfromTo(String name1, String name2) {
+    int start = ht.search(name1);
+    int end = ht.search(name2);
+
+    if (start == -1 || end == -1) {
+        System.out.println("Failed.");
+        return;
+    }
+
+    boolean[] visited = new boolean[adjacencyMatrix.length];
+    Stack<Integer> stack = new Stack<>();
+    stack.push(start);
+    visited[start] = true;
+    while (!stack.isEmpty()) {
+        int current = stack.pop();
+        System.out.print(ht.getValue(current) + " ");
+        if (current == end) {
+            System.out.println("There is a Path  from " + name1 + " to " + name2);
+            return;
+        }
+        for (int i = 0; i < adjacencyMatrix.length; i++) {
+            if (adjacencyMatrix[current][i] > 0 && !visited[i]) {
+                stack.push(i);
+                visited[i] = true;
+            }
+        }
+    }
+    System.out.println("There is no path  from " + name1 + " to " + name2);
+}
+// also check this method
+  
+  public void NoOfVerticesInComponent(String name1) {
+    int start = ht.search(name1);
+
+    if (start == -1) {
+        System.out.println("Failed.");
+        return;
+    }
+
+    boolean[] visited = new boolean[adjacencyMatrix.length];
+    int count = 0;
+    Stack<Integer> stack = new Stack<>();
+    stack.push(start);
+    visited[start] = true;
+    count++;
+    while (!stack.isEmpty()) {
+        int current = stack.pop();
+        for (int i = 0; i < adjacencyMatrix.length; i++) {
+            if (adjacencyMatrix[current][i] > 0 && !visited[i]) {
+                stack.push(i);
+                visited[i] = true;
+                count++;
+            }
+        }
+    }
+    System.out.println("Number of vertices in component the that starts with  " + name1 + "is : " + count);
+}
+  
+public int NoOfPathsFromTo(String name1, String name2) {
+    int start = ht.search(name1);
+    int end = ht.search(name2);
+
+    if (start == -1 || end == -1) {
+        System.out.println("Failed.");
+        return -1;
+    }
+
+    boolean[] visited = new boolean[adjacencyMatrix.length];
+    int[] count = {0};
+    dfs(start, end, visited, count);
+    return count[0];
+}
+
+private void dfs(int current, int end, boolean[] visited, int[] count) {
+    if (current == end) {
+        count[0]++;
+        return;
+    }
+    visited[current] = true;
+    for (int i = 0; i < adjacencyMatrix.length; i++) {
+        if (adjacencyMatrix[current][i] > 0 && !visited[i]) {
+            dfs(i, end, visited, count);
+        }
+    }
+    visited[current] = false;
+}
+public int ShortestPathLengthFromTo(String name1, String name2) {
+    int start = ht.search(name1);
+    int end = ht.search(name2);
+
+    if (start == -1 || end == -1) {
+        System.out.println("Failed.");
+        return -1;
+    }
+
     int[] distance = new int[adjacencyMatrix.length];
     boolean[] visited = new boolean[adjacencyMatrix.length];
 
-    // Initialize all distances as infinite and visited as false
     for (int i = 0; i < distance.length; i++) {
         distance[i] = Integer.MAX_VALUE;
     }
     distance[start] = 0;
 
-    // Using priority queue to get vertex with minimum distance
-    PriorityQueue<Integer> queue = new PriorityQueue<Integer>();
+    Queue<Integer> queue = new LinkedList<>();
     queue.add(start);
 
     while (!queue.isEmpty()) {
-        int currentVertex = queue.poll();
-        visited[currentVertex] = true;
+        int current = queue.poll();
+        visited[current] = true;
 
         for (int i = 0; i < adjacencyMatrix.length; i++) {
-            if (adjacencyMatrix[currentVertex][i] > 0 && !visited[i]) {
-                int newDistance = distance[currentVertex] + adjacencyMatrix[currentVertex][i];
+            if (adjacencyMatrix[current][i] > 0) {
+                int newDistance = distance[current] + adjacencyMatrix[current][i];
                 if (newDistance < distance[i]) {
                     distance[i] = newDistance;
+                    if (!visited[i]) {
+                        queue.add(i);
+                        visited[i] = true;
+                    }
                 }
-                if (i == end) {
-                    return distance[i];
-                }
-                queue.add(i);
             }
         }
     }
-    System.out.println("infinity");
-    return -1;
+    if (distance[end] == Integer.MAX_VALUE) {
+        System.out.println("infinity");
+        return -1;
+    } else {
+        return distance[end];
+    }
 }
-       
+
+
+
+
+
+
+
 
 
     
