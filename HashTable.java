@@ -99,7 +99,10 @@ public class HashTable {
         }
         return names;
     }
-
+         public String getValue(int index) {
+        return array[index];
+    }
 }
+
 
 
