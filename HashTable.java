@@ -27,24 +27,30 @@ public class HashTable {
         for (int i = 0; i < name.length(); i++) {
             hash = hash*31 + name.charAt(i);
         }
+        if(hash < 0) { hash = -hash;
+        
+        }
         return hash % size;
     }
 
-    public void add(String name) {
-        int index = hashCode(name);
-        if (array[index] != null) {
-            int originalIndex = index;
-            index = (index + 1) % size;
-            while (index != originalIndex && array[index] != null) {
-                index = (index + 1) % size;
-            }
-        }
-        array[index] = name;
-        this.size++;
-        if (isFull()) {
-            resize();
-        }
+    public void add(String key) {
+    int index = hashCode(key);
+    if (index < 0 || index >= array.length) {
+        
+        System.out.println("Out of bounds error when trying to add element to HashTable.");
+        return;
     }
+    if (array[index] == null) {
+        array[index] = key;
+    } else {
+        int i = 1;
+        while (array[(index + i) % array.length] != null) {
+            i++;
+        }
+        array[(index + i) % array.length] = key;
+    }
+}
+
 
     private void resize() {
         int newSize = size*2 + 1;
@@ -67,21 +73,27 @@ public class HashTable {
         return true;
     }
 
-    public int search(String name) {
-        int index = hashCode(name);
-        if (array[index] != null && array[index].equals(name)) {
-            return index;
-        }
-        int originalIndex = index;
-        index = (index + 1) % size;
-        while (index != originalIndex && array[index] != null) {
-            if (array[index].equals(name)) {
-                return index;
-            }
-            index = (index + 1) % size;
-        }
+    public int search(String key) {
+    int index = hashCode(key);
+    if (index < 0 || index >= array.length) {
         return -1;
     }
+    if (array[index] == null) {
+        return -1;
+    }
+    if (array[index].equals(key)) {
+        return index;
+    }
+    int i = 1;
+    while (array[(index + i) % array.length] != null) {
+        if (array[(index + i) % array.length].equals(key)) {
+            return (index + i) % array.length;
+        }
+        i++;
+    }
+    return -1;
+}
+
         public String[] getNames() {
         int count = 0;
         for (String name : array) {
